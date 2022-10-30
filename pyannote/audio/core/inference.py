@@ -77,6 +77,11 @@ class Inference:
         When loading a private huggingface.co model, set `use_auth_token`
         to True or to a string containing your hugginface.co authentication
         token that can be obtained by running `huggingface-cli login`
+    cache_dir: Path or str, optional
+        Path to model cache directory. Defauorch/pyannote" when unset.
+    local_files_only: (`bool`, *optional*, defaults to `False`):
+        If `True`, avoid downloading the file and return the path to the
+        local cached file if it exists.
     """
 
     def __init__(
@@ -91,6 +96,8 @@ class Inference:
         pre_aggregation_hook: Callable[[np.ndarray], np.ndarray] = None,
         progress_hook: Union[bool, Text, Callable[[int, int], Any]] = False,
         use_auth_token: Union[Text, None] = None,
+        cache_dir: Union[Path, Text] = None,
+        local_files_only: Optional[bool] = False,
     ):
 
         self.model = (
@@ -101,6 +108,8 @@ class Inference:
                 map_location=device,
                 strict=False,
                 use_auth_token=use_auth_token,
+                cache_dir=cache_dir,
+                local_files_only=local_files_only
             )
         )
 

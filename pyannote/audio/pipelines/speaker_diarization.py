@@ -158,6 +158,8 @@ class SpeakerDiarization(SpeakerDiarizationMixin, Pipeline):
             step=self.segmentation_step * self.segmentation_duration,
             skip_aggregation=True,
             batch_size=self.segmentation_batch_size,
+            cache_dir=cache_dir,
+            local_files_only=local_files_only,
         )
         self._frames: SlidingWindow = self._segmentation.model.introspection.frames
 

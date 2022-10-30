@@ -24,6 +24,7 @@
 
 import math
 from typing import Callable, Optional, Text, Union
+from pathlib import Path
 
 import networkx as nx
 import numpy as np
@@ -64,6 +65,11 @@ class SpeakerSegmentation(SpeakerDiarizationMixin, Pipeline):
         When loading private huggingface.co models, set `use_auth_token`
         to True or to a string containing your hugginface.co authentication
         token that can be obtained by running `huggingface-cli login`
+    cache_dir: Path or str, optional
+        Path to model cache directory. Defauorch/pyannote" when unset.
+    local_files_only: (`bool`, *optional*, defaults to `False`):
+        If `True`, avoid downloading the file and return the path to the
+        local cached file if it exists.
 
     Hyper-parameters
     ----------------
@@ -86,6 +92,8 @@ class SpeakerSegmentation(SpeakerDiarizationMixin, Pipeline):
         skip_conversion: bool = False,
         skip_stitching: bool = False,
         use_auth_token: Union[Text, None] = None,
+        cache_dir: Union[Path, Text] = None,
+        local_files_only: Optional[bool] = False,
     ):
         super().__init__()
 
@@ -93,7 +101,9 @@ class SpeakerSegmentation(SpeakerDiarizationMixin, Pipeline):
         self.skip_stitching = skip_stitching
         self.skip_conversion = skip_conversion
 
-        model: Model = get_model(segmentation, use_auth_token=use_auth_token)
+        model: Model = get_model(segmentation, use_auth_token=use_auth_token,
+                                 cache_dir=cache_dir,
+                                 local_files_only=local_files_only)
         (device,) = get_devices(needs=1)
         model.to(device)
         self._segmentation = Inference(model)

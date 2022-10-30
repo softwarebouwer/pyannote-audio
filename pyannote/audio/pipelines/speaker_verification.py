@@ -549,7 +549,8 @@ class SpeakerEmbedding(Pipeline):
         self.segmentation = segmentation
 
         self.embedding_model_: Model = get_model(
-            embedding, use_auth_token=use_auth_token
+            embedding, use_auth_token=use_auth_token, cache_dir=cache_dir,
+            local_files_only=local_files_only
         )
 
         if self.segmentation is None:

@@ -747,7 +747,7 @@ class Model(pl.LightningModule):
         cache_dir: Path or str, optional
             Path to model cache directory. Defaults to content of PYANNOTE_CACHE
             environment variable, or "~/.cache/torch/pyannote" when unset.
-        local_files_only (`bool`, *optional*, defaults to `False`):
+        local_files_only: (`bool`, *optional*, defaults to `False`):
             If `True`, avoid downloading the file and return the path to the
             local cached file if it exists.
         kwargs: optional
