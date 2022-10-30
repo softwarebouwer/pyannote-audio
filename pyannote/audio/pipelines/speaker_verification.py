@@ -27,7 +27,8 @@ try:
 except ImportError:
     from backports.cached_property import cached_property
 
-from typing import Text, Union
+from typing import Text, Union, Optional
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -206,6 +207,11 @@ class SpeechBrainPretrainedSpeakerEmbedding:
         When loading private huggingface.co models, set `use_auth_token`
         to True or to a string containing your hugginface.co authentication
         token that can be obtained by running `huggingface-cli login`
+    cache_dir: Path or str, optional
+        Path to model cache directory. Defauorch/pyannote" when unset.
+    local_files_only: (`bool`, *optional*, defaults to `False`):
+        If `True`, avoid downloading the file and return the path to the
+        local cached file if it exists.
 
     Usage
     -----
@@ -227,6 +233,8 @@ class SpeechBrainPretrainedSpeakerEmbedding:
         embedding: Text = "speechbrain/spkrec-ecapa-voxceleb",
         device: torch.device = None,
         use_auth_token: Union[Text, None] = None,
+        cache_dir: Union[Path, Text] = CACHE_DIR,
+        local_files_only: Optional[bool] = False,
     ):
 
         if not SPEECHBRAIN_IS_AVAILABLE:
@@ -241,7 +249,7 @@ class SpeechBrainPretrainedSpeakerEmbedding:
 
         self.classifier_ = SpeechBrain_EncoderClassifier.from_hparams(
             source=self.embedding,
-            savedir=f"{CACHE_DIR}/speechbrain",
+            savedir=f"{cache_dir}/speechbrain",
             run_opts={"device": self.device},
             use_auth_token=use_auth_token,
         )
@@ -362,6 +370,11 @@ class PyannoteAudioPretrainedSpeakerEmbedding:
         When loading private huggingface.co models, set `use_auth_token`
         to True or to a string containing your hugginface.co authentication
         token that can be obtained by running `huggingface-cli login`
+    cache_dir: Path or str, optional
+        Path to model cache directory. Defauorch/pyannote" when unset.
+    local_files_only: (`bool`, *optional*, defaults to `False`):
+        If `True`, avoid downloading the file and return the path to the
+        local cached file if it exists.
 
     Usage
     -----
@@ -383,12 +396,17 @@ class PyannoteAudioPretrainedSpeakerEmbedding:
         embedding: PipelineModel = "pyannote/embedding",
         device: torch.device = None,
         use_auth_token: Union[Text, None] = None,
+        cache_dir: Union[Path, Text] = None,
+        local_files_only: Optional[bool] = False,
     ):
         super().__init__()
         self.embedding = embedding
         self.device = device
 
-        self.model_: Model = get_model(self.embedding, use_auth_token=use_auth_token)
+        self.model_: Model = get_model(self.embedding,
+                                       use_auth_token=use_auth_token,
+                                       cache_dir=cache_dir,
+                                       local_files_only=local_files_only)
         self.model_.eval()
         self.model_.to(self.device)
 
@@ -427,6 +445,8 @@ def PretrainedSpeakerEmbedding(
     embedding: PipelineModel,
     device: torch.device = None,
     use_auth_token: Union[Text, None] = None,
+    cache_dir: Union[Path, Text] = None,
+    local_files_only: Optional[bool] = False,
 ):
     """Pretrained speaker embedding
 
@@ -441,6 +461,11 @@ def PretrainedSpeakerEmbedding(
         When loading private huggingface.co models, set `use_auth_token`
         to True or to a string containing your hugginface.co authentication
         token that can be obtained by running `huggingface-cli login`
+    cache_dir: Path or str, optional
+        Path to model cache directory. Defauorch/pyannote" when unset.
+    local_files_only: (`bool`, *optional*, defaults to `False`):
+        If `True`, avoid downloading the file and return the path to the
+        local cached file if it exists.
 
     Usage
     -----
@@ -461,7 +486,8 @@ def PretrainedSpeakerEmbedding(
 
     if isinstance(embedding, str) and "speechbrain" in embedding:
         return SpeechBrainPretrainedSpeakerEmbedding(
-            embedding, device=device, use_auth_token=use_auth_token
+            embedding, device=device, use_auth_token=use_auth_token,
+            cache_dir=cache_dir, local_files_only=local_files_only
         )
 
     elif isinstance(embedding, str) and "nvidia" in embedding:
@@ -469,7 +495,8 @@ def PretrainedSpeakerEmbedding(
 
     else:
         return PyannoteAudioPretrainedSpeakerEmbedding(
-            embedding, device=device, use_auth_token=use_auth_token
+            embedding, device=device, use_auth_token=use_auth_token,
+            cache_dir=cache_dir, local_files_only=local_files_only
         )
 
 
@@ -492,6 +519,11 @@ class SpeakerEmbedding(Pipeline):
         When loading private huggingface.co models, set `use_auth_token`
         to True or to a string containing your hugginface.co authentication
         token that can be obtained by running `huggingface-cli login`
+    cache_dir: Path or str, optional
+        Path to model cache directory. Defauorch/pyannote" when unset.
+    local_files_only: (`bool`, *optional*, defaults to `False`):
+        If `True`, avoid downloading the file and return the path to the
+        local cached file if it exists.
 
     Usage
     -----
@@ -508,6 +540,8 @@ class SpeakerEmbedding(Pipeline):
         embedding: PipelineModel = "pyannote/embedding",
         segmentation: PipelineModel = None,
         use_auth_token: Union[Text, None] = None,
+        cache_dir: Union[Path, Text] = None,
+        local_files_only: Optional[bool] = False,
     ):
         super().__init__()
 
@@ -522,7 +556,8 @@ class SpeakerEmbedding(Pipeline):
             models = [self.embedding_model_]
         else:
             segmentation_model: Model = get_model(
-                self.segmentation, use_auth_token=use_auth_token
+                self.segmentation, use_auth_token=use_auth_token,
+                cache_dir=cache_dir, local_files_only=local_files_only
             )
             models = [self.embedding_model_, segmentation_model]
 

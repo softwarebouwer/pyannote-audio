@@ -29,12 +29,17 @@ from torch_audiomentations.utils.config import from_dict as augmentation_from_di
 
 from pyannote.audio import Inference, Model
 
+from typing import Optional
+from pathlib import Path
+
 PipelineModel = Union[Model, Text, Mapping]
 
 
 def get_model(
     model: PipelineModel,
     use_auth_token: Union[Text, None] = None,
+    cache_dir: Union[Path, Text] = None,
+    local_files_only: Optional[bool] = False,
 ) -> Model:
     """Load pretrained model and set it into `eval` mode.
 
@@ -49,6 +54,11 @@ def get_model(
         When loading a private or gated huggingface.co pipeline, set `use_auth_token`
         to True or to a string containing your hugginface.co authentication
         token that can be obtained by visiting https://hf.co/settings/tokens
+    cache_dir: Path or str, optional
+        Path to model cache directory. Defauorch/pyannote" when unset.
+    local_files_only: (`bool`, *optional*, defaults to `False`):
+        If `True`, avoid downloading the file and return the path to the
+        local cached file if it exists.
 
     Returns
     -------
@@ -73,11 +83,14 @@ def get_model(
 
     elif isinstance(model, Text):
         model = Model.from_pretrained(
-            model, use_auth_token=use_auth_token, strict=False
+            model, use_auth_token=use_auth_token, cache_dir=cache_dir,
+            local_files_only=local_files_only, strict=False
         )
 
     elif isinstance(model, Mapping):
         model.setdefault("use_auth_token", use_auth_token)
+        model.setdefault("cache_dir", cache_dir)
+        model.setdefault("local_files_only", local_files_only)
         model = Model.from_pretrained(**model)
 
     else:

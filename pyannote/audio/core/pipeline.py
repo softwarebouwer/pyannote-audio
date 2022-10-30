@@ -49,6 +49,7 @@ class Pipeline(_Pipeline):
         hparams_file: Union[Text, Path] = None,
         use_auth_token: Union[Text, None] = None,
         cache_dir: Union[Path, Text] = CACHE_DIR,
+        local_files_only: Optional[bool] = False,
     ) -> "Pipeline":
         """Load pretrained pipeline
 
@@ -64,6 +65,9 @@ class Pipeline(_Pipeline):
             token that can be obtained by running `huggingface-cli login`
         cache_dir: Path or str, optional
             Path to model cache directory. Defauorch/pyannote" when unset.
+        local_files_only: (`bool`, *optional*, defaults to `False`):
+            If `True`, avoid downloading the file and return the path to the
+            local cached file if it exists.
         """
 
         checkpoint_path = str(checkpoint_path)
@@ -93,7 +97,7 @@ class Pipeline(_Pipeline):
                     # etag_timeout=10,
                     # resume_download=False,
                     use_auth_token=use_auth_token,
-                    # local_files_only=False,
+                    local_files_only=local_files_only,
                     # legacy_cache_layout=False,
                 )
 
@@ -123,6 +127,8 @@ visit https://hf.co/{model_id} to accept the user conditions."""
         )
         params = config["pipeline"].get("params", {})
         params.setdefault("use_auth_token", use_auth_token)
+        params.setdefault("cache_dir", cache_dir)
+        params.setdefault("local_files_only", local_files_only)
         pipeline = Klass(**params)
 
         # freeze  parameters

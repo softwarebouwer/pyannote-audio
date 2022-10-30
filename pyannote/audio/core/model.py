@@ -714,6 +714,7 @@ class Model(pl.LightningModule):
         strict: bool = True,
         use_auth_token: Union[Text, None] = None,
         cache_dir: Union[Path, Text] = CACHE_DIR,
+        local_files_only: Optional[bool] = False,
         **kwargs,
     ) -> "Model":
         """Load pretrained model
@@ -746,6 +747,9 @@ class Model(pl.LightningModule):
         cache_dir: Path or str, optional
             Path to model cache directory. Defaults to content of PYANNOTE_CACHE
             environment variable, or "~/.cache/torch/pyannote" when unset.
+        local_files_only (`bool`, *optional*, defaults to `False`):
+            If `True`, avoid downloading the file and return the path to the
+            local cached file if it exists.
         kwargs: optional
             Any extra keyword args needed to init the model.
             Can also be used to override saved hyperparameter values.
@@ -796,7 +800,7 @@ class Model(pl.LightningModule):
                     # etag_timeout=10,
                     # resume_download=False,
                     use_auth_token=use_auth_token,
-                    # local_files_only=False,
+                    local_files_only=local_files_only,
                     # legacy_cache_layout=False,
                 )
             except RepositoryNotFoundError:
@@ -834,7 +838,7 @@ visit https://hf.co/{model_id} to accept the user conditions."""
                     # etag_timeout=10,
                     # resume_download=False,
                     use_auth_token=use_auth_token,
-                    # local_files_only=False,
+                    local_files_only=local_files_only,
                     # legacy_cache_layout=False,
                 )
 

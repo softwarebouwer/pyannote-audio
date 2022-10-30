@@ -25,6 +25,7 @@
 import itertools
 import math
 from typing import Callable, Optional, Text, Union
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -90,6 +91,11 @@ class SpeakerDiarization(SpeakerDiarizationMixin, Pipeline):
         When loading private huggingface.co models, set `use_auth_token`
         to True or to a string containing your hugginface.co authentication
         token that can be obtained by running `huggingface-cli login`
+    cache_dir: Path or str, optional
+        Path to model cache directory. Defauorch/pyannote" when unset.
+    local_files_only: (`bool`, *optional*, defaults to `False`):
+        If `True`, avoid downloading the file and return the path to the
+        local cached file if it exists.
 
     Usage
     -----
@@ -117,12 +123,16 @@ class SpeakerDiarization(SpeakerDiarizationMixin, Pipeline):
         segmentation_batch_size: int = 32,
         der_variant: dict = None,
         use_auth_token: Union[Text, None] = None,
+        cache_dir: Union[Path, Text] = None,
+        local_files_only: Optional[bool] = False,
     ):
 
         super().__init__()
 
         self.segmentation_model = segmentation
-        model: Model = get_model(segmentation, use_auth_token=use_auth_token)
+        model: Model = get_model(segmentation, use_auth_token=use_auth_token,
+                                 cache_dir=cache_dir,
+                                 local_files_only=local_files_only)
 
         self.segmentation_batch_size = segmentation_batch_size
         self.segmentation_duration = (
@@ -161,7 +171,8 @@ class SpeakerDiarization(SpeakerDiarizationMixin, Pipeline):
 
         else:
             self._embedding = PretrainedSpeakerEmbedding(
-                self.embedding, device=emb_device, use_auth_token=use_auth_token
+                self.embedding, device=emb_device, use_auth_token=use_auth_token,
+                cache_dir=cache_dir, local_files_only=local_files_only
             )
             self._audio = Audio(sample_rate=self._embedding.sample_rate, mono=True)
             metric = self._embedding.metric
